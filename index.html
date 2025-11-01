@@ -117,6 +117,7 @@ button.ghost{ background:transparent; border:1px solid rgba(255,255,255,0.06); c
         <button id="adminLoginBtn">Entrar</button>
         <button class="ghost" id="modalCloseBtn">Fechar</button>
       </div>
+      <div class="small">Senha padrão: <b>Contatar Administrador</b></div>
     </div>
 
     <div id="panelArea" style="display:none">
@@ -149,12 +150,11 @@ const raspeText=document.getElementById('raspeText');
 const prizeInside=document.getElementById('prizeInside');
 
 const KEY_LAST='raspadinha_last';
-const KEY_PRIZE='raspadinha_prize';
 const KEY_USES='raspadinha_uses';
 const KEY_LIMIT='raspadinha_limit_days';
 const KEY_HISTORY='raspadinha_history';
 const DEFAULT_LIMIT=7;
-const DEFAULT_ADMIN_PASS='admin123'; // <-- coloque aqui sua senha
+const DEFAULT_ADMIN_PASS='admin123';
 
 const PRIZES = [
   {emoji:'🎁', label:'10% de desconto', weight:10},
@@ -171,7 +171,7 @@ const PRIZES = [
 
 let ctx,w,h,isDrawing=false,revealed=false;
 
-// --- Função pickPrize com chance igual ---
+// --- Função pickPrize com chance --- 
 function pickPrize(){
   const weighted = [];
   PRIZES.forEach(p=>{ for(let i=0;i<p.weight;i++) weighted.push(p); });
@@ -217,16 +217,14 @@ function getUses(){return parseInt(localStorage.getItem(KEY_USES)||'1',10);}
 function setUses(v){localStorage.setItem(KEY_USES,String(v));}
 function getLimit(){return parseInt(localStorage.getItem(KEY_LIMIT)||DEFAULT_LIMIT,10);}
 function setLimit(v){localStorage.setItem(KEY_LIMIT,String(v)); statusText.textContent='Limite: '+v+' dia(s)';}
-function getStoredPrize(){try{return JSON.parse(localStorage.getItem(KEY_PRIZE));}catch(e){return null;}}
-function setStoredPrize(p){localStorage.setItem(KEY_PRIZE,JSON.stringify(p));}
 function getHistory(){try{return JSON.parse(localStorage.getItem(KEY_HISTORY))||[];}catch(e){return []}}
 function addHistory(p){ const h=getHistory(); h.unshift({time:Date.now(),emoji:p.emoji,label:p.label}); localStorage.setItem(KEY_HISTORY,JSON.stringify(h)); updateHistory();}
 function updateHistory(){ const h=getHistory(); historyDiv.innerHTML=h.map(i=>`${new Date(i.time).toLocaleString()}: ${i.emoji} ${i.label}`).join('<br>')||'Histórico:';}
 
 // --- Raspadinha ---
 function canScratch(){ const last=getLast(); const limit=getLimit()*24*60*60*1000; return getUses()>0 || (Date.now()-last)>limit; }
-function showLocked(){ const prize=getStoredPrize(); prizeBelow.textContent=prize?prize.emoji+' '+prize.label:'Você já usou!'; overlay.style.pointerEvents='none'; newBtn.style.display='none'; raspeText.style.display='none'; const last=getLast(); const remaining=Math.max(0,getLimit()*24*60*60*1000-(Date.now()-last)); const hours=Math.floor(remaining/3600000); const minutes=Math.floor((remaining%3600000)/60000); const seconds=Math.floor((remaining%60000)/1000); statusText.textContent=`Próxima raspadinha em ${hours}h ${minutes}m ${seconds}s`; }
-function checkReveal(){ const img=ctx.getImageData(0,0,w,h).data; let cleared=0; for(let i=3;i<img.length;i+=4) if(img[i]===0) cleared++; if(cleared/(w*h)*100>35 && !revealed){ revealed=true; let prize=getStoredPrize(); if(!prize) prize=pickPrize(); prizeBelow.textContent=prize.emoji+' '+prize.label; prizeInside.textContent=prize.emoji+' '+prize.label; setStoredPrize(prize); addHistory(prize); setUses(getUses()-1); setLast(Date.now()); overlay.style.pointerEvents='none'; raspeText.style.display='none'; newBtn.style.display='none'; }}
+function showLocked(){ const last=getLast(); const remaining=Math.max(0,getLimit()*24*60*60*1000-(Date.now()-last)); const hours=Math.floor(remaining/3600000); const minutes=Math.floor((remaining%3600000)/60000); const seconds=Math.floor((remaining%60000)/1000); statusText.textContent=`Próxima raspadinha em ${hours}h ${minutes}m ${seconds}s`; overlay.style.pointerEvents='none'; raspeText.style.display='none'; newBtn.style.display='inline-block'; }
+function checkReveal(){ const img=ctx.getImageData(0,0,w,h).data; let cleared=0; for(let i=3;i<img.length;i+=4) if(img[i]===0) cleared++; if(cleared/(w*h)*100>35 && !revealed){ revealed=true; const prize=pickPrize(); prizeBelow.textContent=prize.emoji+' '+prize.label; prizeInside.textContent=prize.emoji+' '+prize.label; addHistory(prize); setUses(getUses()-1); setLast(Date.now()); overlay.style.pointerEvents='none'; raspeText.style.display='none'; newBtn.style.display='inline-block'; }}
 
 // --- Eventos ---
 window.addEventListener('load',()=>{ resizeCanvas(); updateHistory(); if(!canScratch()) showLocked(); });
@@ -260,17 +258,16 @@ gearBtn.addEventListener('click',()=>{modalBack.style.display='flex';adminPassIn
 modalCloseBtn.addEventListener('click',()=>{modalBack.style.display='none';adminPassInput.value='';});
 modalBack.addEventListener('click',e=>{if(e.target===modalBack){modalBack.style.display='none';adminPassInput.value='';}});
 adminLoginBtn.addEventListener('click',()=>{
-    if(adminPassInput.value===DEFAULT_ADMIN_PASS){
-        loginArea.style.display='none';
-        panelArea.style.display='block';
-    } else {
-        alert('Senha incorreta');
-    }
+  if(adminPassInput.value===DEFAULT_ADMIN_PASS){
+    loginArea.style.display='none';
+    panelArea.style.display='block';
+  }else{
+    alert('Senha incorreta');
+  }
 });
 grantUsesBtn.addEventListener('click',()=>{let n=parseInt(grantUsesInput.value)||1; setUses(n); alert('Usuário liberado para '+n+' raspada(s).');});
 setLimitBtn.addEventListener('click',()=>{let d=parseInt(limitDaysInput.value)||DEFAULT_LIMIT; setLimit(d); alert('Limite alterado para '+d+' dia(s)');});
-resetUserBtn.addEventListener('click',()=>{if(confirm('Resetar usuário?')){localStorage.removeItem(KEY_LAST);localStorage.removeItem(KEY_PRIZE);localStorage.removeItem(KEY_USES);localStorage.removeItem(KEY_HISTORY);createOverlay(); overlay.style.pointerEvents='auto'; newBtn.style.display='inline-block'; updateHistory();}});
-
+resetUserBtn.addEventListener('click',()=>{if(confirm('Resetar usuário?')){localStorage.removeItem(KEY_LAST);localStorage.removeItem(KEY_USES);localStorage.removeItem(KEY_HISTORY); createOverlay(); overlay.style.pointerEvents='auto'; newBtn.style.display='inline-block'; updateHistory();}});
 wipeAllBtn.addEventListener('click',()=>{if(confirm('Limpar storage da página?')){localStorage.clear();alert('Storage limpo. Recarregue a página.'); updateHistory();}});
 </script>
 </body>
