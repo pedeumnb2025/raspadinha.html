@@ -6,23 +6,27 @@
 <title>Raspadinha Persistente</title>
 <style>
 :root{
-  --bg-pc: url('https://i.imgur.com/dbYhurt.png'); /* Fundo PC */
-  --bg-mobile: url('https://imgur.com/a/5TwGJKo.png'); /* Fundo Mobile */
+  --bg-desktop: url('https://i.imgur.com/7FXx8jt.png'); /* Link direto do fundo desktop */
+  --bg-mobile: url('https://i.imgur.com/GvTCnJ7.png');   /* Link direto do fundo mobile */
 }
 body{
   margin:0;
   min-height:100vh;
-  background: var(--bg-pc) center/cover no-repeat;
+  background: var(--bg-desktop) center/cover no-repeat;
   color:#fff;
   font-family:Arial,sans-serif;
   display:flex;
   justify-content:center;
   align-items:center;
   padding:18px;
+  transition: background 0.3s ease;
 }
 @media (max-width:768px){
-  body{background: var(--bg-mobile) center/cover no-repeat;}
+  body{
+    background: var(--bg-mobile) center/cover no-repeat;
+  }
 }
+
 .wrap{
   width:360px;
   max-width:96%;
@@ -44,14 +48,6 @@ h1{margin:0 0 12px;font-size:18px;}
 }
 canvas#overlay{
   position:absolute;inset:0;width:100%;height:100%;z-index:2;cursor:grab;border-radius:10px;
-}
-.scratch-text{
-  position:absolute;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  color:#fff;font-size:22px;font-weight:bold;
-  text-align:center;z-index:3;
-  pointer-events:none;
 }
 .prize-below{
   text-align:center;
@@ -84,13 +80,13 @@ button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);colo
 <body>
 
 <div class="wrap">
-  <img class="logo" src="https://imgur.com/JK12HA7.png" alt="Logo">
+  <img class="logo" src="https://i.imgur.com/JK12HA7.png" alt="Logo">
   <div class="card">
     <h1>Raspadinha Persistente</h1>
 
     <div class="scratch-area" id="scratchArea">
       <canvas id="overlay"></canvas>
-      <div class="scratch-text" id="scratchText">Raspe aqui</div>
+      <div id="raspeText" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-weight:bold;font-size:20px;pointer-events:none;z-index:3;">Raspe aqui</div>
     </div>
 
     <div class="prize-below" id="prizeBelow"></div>
@@ -114,7 +110,7 @@ button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);colo
         <button id="adminLoginBtn">Entrar</button>
         <button class="ghost" id="modalCloseBtn">Fechar</button>
       </div>
-      <div class="small">Senha padrão: <b>Contatar o Administrador</b></div>
+      <div class="small">Senha padrão: <b>admin123</b></div>
     </div>
 
     <div id="panelArea" style="display:none">
@@ -138,29 +134,14 @@ button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);colo
 </div>
 
 <script>
+// --- Variáveis ---
 const overlay=document.getElementById('overlay');
 const prizeBelow=document.getElementById('prizeBelow');
 const newBtn=document.getElementById('newBtn');
 const statusText=document.getElementById('statusText');
 const historyDiv=document.getElementById('history');
-const scratchText=document.getElementById('scratchText');
+const raspeText=document.getElementById('raspeText');
 
-// Admin
-const gearBtn=document.getElementById('gearBtn');
-const modalBack=document.getElementById('modalBack');
-const modalCloseBtn=document.getElementById('modalCloseBtn');
-const adminPassInput=document.getElementById('adminPass');
-const adminLoginBtn=document.getElementById('adminLoginBtn');
-const loginArea=document.getElementById('loginArea');
-const panelArea=document.getElementById('panelArea');
-const grantUsesInput=document.getElementById('grantUsesInput');
-const grantUsesBtn=document.getElementById('grantUsesBtn');
-const limitDaysInput=document.getElementById('limitDaysInput');
-const setLimitBtn=document.getElementById('setLimitBtn');
-const resetUserBtn=document.getElementById('resetUserBtn');
-const wipeAllBtn=document.getElementById('wipeAllBtn');
-
-// Storage
 const KEY_LAST='raspadinha_last';
 const KEY_PRIZE='raspadinha_prize';
 const KEY_USES='raspadinha_uses';
@@ -184,13 +165,90 @@ const PRIZES=[
 
 let ctx,w,h,isDrawing=false,revealed=false;
 
-// Storage helpers
+// --- Funções ---
+function resizeCanvas(){
+  w=overlay.clientWidth;
+  h=overlay.clientHeight;
+  overlay.width=w;
+  overlay.height=h;
+  ctx=overlay.getContext('2d');
+  createOverlay();
+}
+
+function createOverlay(){
+  ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle='#cfcfcf';
+  ctx.fillRect(0,0,w,h);
+  ctx.globalAlpha=0.05;
+  ctx.fillStyle='#fff';
+  for(let i=0;i<60;i++) ctx.fillRect(Math.random()*w,Math.random()*h,Math.random()*80+40,1);
+  ctx.globalAlpha=1;
+  ctx.globalCompositeOperation='destination-out';
+  raspeText.style.display='block';
+  prizeBelow.textContent='';
+  revealed=false;
+}
+
+function pt(e){
+  const r=overlay.getBoundingClientRect();
+  const p=e.touches?e.touches[0]:e;
+  return {x:p.clientX-r.left, y:p.clientY-r.top};
+}
+
+function drawDot(x,y){
+  ctx.beginPath();
+  ctx.arc(x,y,20,0,Math.PI*2);
+  ctx.fill();
+}
+
+function startDraw(e){
+  if(!canScratch()){showLocked(); return;}
+  isDrawing=true;
+  drawDot(pt(e).x, pt(e).y);
+  e.preventDefault();
+}
+function moveDraw(e){
+  if(!isDrawing) return;
+  e.preventDefault();
+  const p=pt(e);
+  ctx.lineWidth=20;
+  ctx.lineCap='round';
+  ctx.beginPath();
+  ctx.moveTo(p.x,p.y);
+  ctx.lineTo(p.x+0.01,p.y+0.01);
+  ctx.stroke();
+  checkReveal();
+}
+function endDraw(){if(!isDrawing) return; isDrawing=false; checkReveal();}
+
+function pickPrize(){return PRIZES[Math.floor(Math.random()*PRIZES.length)];}
+
+function checkReveal(){
+  const img=ctx.getImageData(0,0,w,h).data;
+  let cleared=0;
+  for(let i=3;i<img.length;i+=4) if(img[i]===0) cleared++;
+  if(cleared/(w*h)*100>35 && !revealed){
+    revealed=true;
+    let prize=getStoredPrize();
+    if(!prize) prize=pickPrize();
+    prizeBelow.textContent=prize.emoji+' '+prize.label;
+    setStoredPrize(prize);
+    addHistory(prize);
+    setUses(getUses()-1);
+    setLast(Date.now());
+    overlay.style.pointerEvents='none';
+    raspeText.style.display='none';
+    newBtn.style.display='none';
+  }
+}
+
+// --- Storage ---
 function getLast(){return parseInt(localStorage.getItem(KEY_LAST)||'0',10);}
 function setLast(v){localStorage.setItem(KEY_LAST,String(v));}
 function getUses(){return parseInt(localStorage.getItem(KEY_USES)||'1',10);}
 function setUses(v){localStorage.setItem(KEY_USES,String(v));}
 function getLimit(){return parseInt(localStorage.getItem(KEY_LIMIT)||DEFAULT_LIMIT,10);}
-function setLimit(v){localStorage.setItem(KEY_LIMIT,String(v));statusText.textContent='Limite: '+v+' dia(s)';}
+function setLimit(v){localStorage.setItem(KEY_LIMIT,String(v)); statusText.textContent='Limite: '+v+' dia(s)';}
 function getStoredPrize(){try{return JSON.parse(localStorage.getItem(KEY_PRIZE));}catch(e){return null;}}
 function setStoredPrize(p){localStorage.setItem(KEY_PRIZE,JSON.stringify(p));}
 function getHistory(){try{return JSON.parse(localStorage.getItem(KEY_HISTORY))||[];}catch(e){return []}}
@@ -205,40 +263,6 @@ function updateHistory(){
   historyDiv.innerHTML=h.map(i=>`${new Date(i.time).toLocaleString()}: ${i.emoji} ${i.label}`).join('<br>')||'Histórico:';
 }
 
-// Canvas
-function resizeCanvas(){w=overlay.clientWidth;h=overlay.clientHeight;overlay.width=w;overlay.height=h;ctx=overlay.getContext('2d');createOverlay();}
-function createOverlay(){ctx.globalCompositeOperation='source-over';ctx.fillStyle='#cfcfcf';ctx.fillRect(0,0,w,h);ctx.globalAlpha=0.05;ctx.fillStyle='#fff';for(let i=0;i<60;i++)ctx.fillRect(Math.random()*w,Math.random()*h,Math.random()*80+40,1);ctx.globalAlpha=1;ctx.globalCompositeOperation='destination-out';}
-
-// Pointer
-function pt(e){const r=overlay.getBoundingClientRect();const p=e.touches?e.touches[0]:e;return{x:p.clientX-r.left,y:p.clientY-r.top};}
-function startDraw(e){if(!canScratch()){showLocked();return;}isDrawing=true;const p=pt(e);drawDot(p.x,p.y);scratchText.style.display='none';e.preventDefault();}
-function moveDraw(e){if(!isDrawing)return;e.preventDefault();const p=pt(e);ctx.lineWidth=20;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+0.01,p.y+0.01);ctx.stroke();checkReveal();}
-function endDraw(){if(!isDrawing)return;isDrawing=false;checkReveal();}
-function drawDot(x,y){ctx.beginPath();ctx.arc(x,y,20,0,Math.PI*2);ctx.fill();}
-
-function pickPrize(){return PRIZES[Math.floor(Math.random()*PRIZES.length)];}
-function checkReveal(){
-  const img=ctx.getImageData(0,0,w,h).data;
-  let cleared=0;
-  for(let i=3;i<img.length;i+=4) if(img[i]===0) cleared++;
-  if(cleared/(w*h)*100>35 && !revealed){
-    revealed=true;
-    let prize=getStoredPrize();
-    if(!prize) prize=pickPrize();
-    setStoredPrize(prize);
-    addHistory(prize);
-    setUses(getUses()-1);
-    setLast(Date.now());
-
-    // Mostra o prêmio dentro da raspadinha
-    const scratchArea = document.getElementById('scratchArea');
-    scratchArea.innerHTML = `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:22px;font-weight:bold;text-align:center;z-index:3;">${prize.emoji}<br>${prize.label}</div>`;
-
-    overlay.style.pointerEvents='none';
-    newBtn.style.display='none';
-  }
-}
-
 function canScratch(){
   const last=getLast();
   const limit=getLimit()*24*60*60*1000;
@@ -250,6 +274,7 @@ function showLocked(){
   prizeBelow.textContent=prize?prize.emoji+' '+prize.label:'Você já usou!';
   overlay.style.pointerEvents='none';
   newBtn.style.display='none';
+  raspeText.style.display='none';
   const last=getLast();
   const remaining=Math.max(0,getLimit()*24*60*60*1000-(Date.now()-last));
   const hours=Math.floor(remaining/3600000);
@@ -258,7 +283,7 @@ function showLocked(){
   statusText.textContent=`Próxima raspadinha em ${hours}h ${minutes}m ${seconds}s`;
 }
 
-// Init
+// --- Eventos ---
 window.addEventListener('load',()=>{
   resizeCanvas();
   updateHistory();
@@ -266,8 +291,7 @@ window.addEventListener('load',()=>{
 });
 window.addEventListener('resize',()=>setTimeout(resizeCanvas,50));
 
-// Pointer events
-overlay.addEventListener('pointerdown',e=>{overlay.setPointerCapture(e.pointerId);startDraw(e);});
+overlay.addEventListener('pointerdown',e=>{overlay.setPointerCapture(e.pointerId); startDraw(e);});
 overlay.addEventListener('pointermove',moveDraw);
 overlay.addEventListener('pointerup',endDraw);
 overlay.addEventListener('pointercancel',endDraw);
@@ -275,59 +299,31 @@ overlay.addEventListener('touchstart',startDraw,{passive:false});
 overlay.addEventListener('touchmove',moveDraw,{passive:false});
 overlay.addEventListener('touchend',endDraw);
 
-// New Raspadinha
-newBtn.addEventListener('click',()=>{
-  revealed=false;
-  createOverlay();
-  overlay.style.pointerEvents='auto';
-  prizeBelow.textContent='';
-  scratchText.style.display='block';
-  newBtn.style.display='inline-block';
-});
+newBtn.addEventListener('click',()=>{createOverlay(); overlay.style.pointerEvents='auto'; newBtn.style.display='inline-block';});
 
-// Admin modal
+// Admin (permanece igual)
+const gearBtn=document.getElementById('gearBtn');
+const modalBack=document.getElementById('modalBack');
+const modalCloseBtn=document.getElementById('modalCloseBtn');
+const adminPassInput=document.getElementById('adminPass');
+const adminLoginBtn=document.getElementById('adminLoginBtn');
+const loginArea=document.getElementById('loginArea');
+const panelArea=document.getElementById('panelArea');
+const grantUsesInput=document.getElementById('grantUsesInput');
+const grantUsesBtn=document.getElementById('grantUsesBtn');
+const limitDaysInput=document.getElementById('limitDaysInput');
+const setLimitBtn=document.getElementById('setLimitBtn');
+const resetUserBtn=document.getElementById('resetUserBtn');
+const wipeAllBtn=document.getElementById('wipeAllBtn');
+
 gearBtn.addEventListener('click',()=>{modalBack.style.display='flex';adminPassInput.focus();});
 modalCloseBtn.addEventListener('click',()=>{modalBack.style.display='none';adminPassInput.value='';});
 modalBack.addEventListener('click',e=>{if(e.target===modalBack){modalBack.style.display='none';adminPassInput.value='';}});
-adminLoginBtn.addEventListener('click',()=>{
-  if(adminPassInput.value===DEFAULT_ADMIN_PASS){
-    loginArea.style.display='none';
-    panelArea.style.display='block';
-  }else{alert('Senha incorreta');}
-});
-grantUsesBtn.addEventListener('click',()=>{
-  let n=parseInt(grantUsesInput.value)||1;
-  setUses(n);
-  alert('Usuário liberado para '+n+' raspada(s).');
-});
-setLimitBtn.addEventListener('click',()=>{
-  let d=parseInt(limitDaysInput.value)||DEFAULT_LIMIT;
-  setLimit(d);
-  alert('Limite alterado para '+d+' dia(s)');
-});
-resetUserBtn.addEventListener('click',()=>{
-  if(confirm('Resetar usuário?')){
-    localStorage.removeItem(KEY_LAST);
-    localStorage.removeItem(KEY_PRIZE);
-    localStorage.removeItem(KEY_USES);
-    localStorage.removeItem(KEY_HISTORY);
-    prizeBelow.textContent='';
-    createOverlay();
-    overlay.style.pointerEvents='auto';
-    scratchText.style.display='block';
-    newBtn.style.display='inline-block';
-    updateHistory();
-  }
-});
-wipeAllBtn.addEventListener('click',()=>{
-  if(confirm('Limpar storage da página?')){
-    localStorage.clear();
-    alert('Storage limpo. Recarregue a página.');
-    updateHistory();
-  }
-});
+adminLoginBtn.addEventListener('click',()=>{if(adminPassInput.value===DEFAULT_ADMIN_PASS){loginArea.style.display='none';panelArea.style.display='block';}else{alert('Senha incorreta');}});
+grantUsesBtn.addEventListener('click',()=>{let n=parseInt(grantUsesInput.value)||1; setUses(n); alert('Usuário liberado para '+n+' raspada(s).');});
+setLimitBtn.addEventListener('click',()=>{let d=parseInt(limitDaysInput.value)||DEFAULT_LIMIT; setLimit(d); alert('Limite alterado para '+d+' dia(s)');});
+resetUserBtn.addEventListener('click',()=>{if(confirm('Resetar usuário?')){localStorage.removeItem(KEY_LAST);localStorage.removeItem(KEY_PRIZE);localStorage.removeItem(KEY_USES);localStorage.removeItem(KEY_HISTORY);createOverlay(); overlay.style.pointerEvents='auto'; newBtn.style.display='inline-block'; updateHistory();}});
+wipeAllBtn.addEventListener('click',()=>{if(confirm('Limpar storage da página?')){localStorage.clear();alert('Storage limpo. Recarregue a página.'); updateHistory();}});
 </script>
 </body>
 </html>
-
-
