@@ -6,8 +6,8 @@
 <title>Raspe e ganhe</title>
 <style>
 :root{
-  --bg-desktop: url('https://i.imgur.com/7FXx8jt.png'); /* Link direto do fundo desktop */
-  --bg-mobile: url('https://i.imgur.com/GvTCnJ7.png');   /* Link direto do fundo mobile */
+  --bg-desktop: url('https://i.imgur.com/7FXx8jt.png');
+  --bg-mobile: url('https://i.imgur.com/GvTCnJ7.png');
 }
 body{
   margin:0;
@@ -22,9 +22,7 @@ body{
   transition: background 0.3s ease;
 }
 @media (max-width:768px){
-  body{
-    background: var(--bg-mobile) center/cover no-repeat;
-  }
+  body{background: var(--bg-mobile) center/cover no-repeat;}
 }
 
 .wrap{
@@ -48,6 +46,17 @@ h1{margin:0 0 12px;font-size:18px;}
 }
 canvas#overlay{
   position:absolute;inset:0;width:100%;height:100%;z-index:2;cursor:grab;border-radius:10px;
+}
+#prizeInside{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:24px;
+  font-weight:bold;
+  color:#fff;
+  z-index:1;
+  text-align:center;
 }
 .prize-below{
   text-align:center;
@@ -85,6 +94,7 @@ button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);colo
     <h1>Raspadinha Persistente</h1>
 
     <div class="scratch-area" id="scratchArea">
+      <div id="prizeInside">🎁 10% de desconto</div>
       <canvas id="overlay"></canvas>
       <div id="raspeText" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-weight:bold;font-size:20px;pointer-events:none;z-index:3;">Raspe aqui</div>
     </div>
@@ -100,7 +110,6 @@ button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);colo
 </div>
 
 <div class="gear" id="gearBtn" title="Admin">⚙️</div>
-
 <div class="modal-back" id="modalBack">
   <div class="modal" role="dialog" aria-modal="true">
     <h2>Painel Admin</h2>
@@ -110,9 +119,8 @@ button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);colo
         <button id="adminLoginBtn">Entrar</button>
         <button class="ghost" id="modalCloseBtn">Fechar</button>
       </div>
-      <div class="small">Senha padrão: <b>admin123</b></div>
+      <div class="small">Senha padrão: <b>Contatar o Administrador</b></div>
     </div>
-
     <div id="panelArea" style="display:none">
       <div class="small">Liberar raspadinhas:</div>
       <div class="row">
@@ -134,9 +142,9 @@ button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);colo
 </div>
 
 <script>
-// --- Variáveis ---
 const overlay=document.getElementById('overlay');
 const prizeBelow=document.getElementById('prizeBelow');
+const prizeInside=document.getElementById('prizeInside');
 const newBtn=document.getElementById('newBtn');
 const statusText=document.getElementById('statusText');
 const historyDiv=document.getElementById('history');
@@ -165,7 +173,7 @@ const PRIZES=[
 
 let ctx,w,h,isDrawing=false,revealed=false;
 
-// --- Funções ---
+// --- Canvas ---
 function resizeCanvas(){
   w=overlay.clientWidth;
   h=overlay.clientHeight;
@@ -185,8 +193,12 @@ function createOverlay(){
   ctx.globalAlpha=1;
   ctx.globalCompositeOperation='destination-out';
   raspeText.style.display='block';
-  prizeBelow.textContent='';
   revealed=false;
+
+  // Sorteia o prêmio e coloca no prêmio dentro
+  let prize = pickPrize();
+  setStoredPrize(prize);
+  prizeInside.textContent = prize.emoji + ' ' + prize.label;
 }
 
 function pt(e){
@@ -229,16 +241,13 @@ function checkReveal(){
   for(let i=3;i<img.length;i+=4) if(img[i]===0) cleared++;
   if(cleared/(w*h)*100>35 && !revealed){
     revealed=true;
-    let prize=getStoredPrize();
-    if(!prize) prize=pickPrize();
-    prizeBelow.textContent=prize.emoji+' '+prize.label;
-    setStoredPrize(prize);
-    addHistory(prize);
+    addHistory(getStoredPrize());
     setUses(getUses()-1);
     setLast(Date.now());
     overlay.style.pointerEvents='none';
     raspeText.style.display='none';
     newBtn.style.display='none';
+    prizeBelow.textContent = "Você ganhou: " + getStoredPrize().emoji + " " + getStoredPrize().label;
   }
 }
 
@@ -262,16 +271,14 @@ function updateHistory(){
   const h=getHistory();
   historyDiv.innerHTML=h.map(i=>`${new Date(i.time).toLocaleString()}: ${i.emoji} ${i.label}`).join('<br>')||'Histórico:';
 }
-
 function canScratch(){
   const last=getLast();
   const limit=getLimit()*24*60*60*1000;
   return getUses()>0 || (Date.now()-last)>limit;
 }
-
 function showLocked(){
   const prize=getStoredPrize();
-  prizeBelow.textContent=prize?prize.emoji+' '+prize.label:'Você já usou!';
+  prizeBelow.textContent=prize?("Você ganhou: "+prize.emoji+" "+prize.label):'Você já usou!';
   overlay.style.pointerEvents='none';
   newBtn.style.display='none';
   raspeText.style.display='none';
@@ -284,11 +291,7 @@ function showLocked(){
 }
 
 // --- Eventos ---
-window.addEventListener('load',()=>{
-  resizeCanvas();
-  updateHistory();
-  if(!canScratch()) showLocked();
-});
+window.addEventListener('load',()=>{resizeCanvas(); updateHistory(); if(!canScratch()) showLocked();});
 window.addEventListener('resize',()=>setTimeout(resizeCanvas,50));
 
 overlay.addEventListener('pointerdown',e=>{overlay.setPointerCapture(e.pointerId); startDraw(e);});
@@ -301,7 +304,7 @@ overlay.addEventListener('touchend',endDraw);
 
 newBtn.addEventListener('click',()=>{createOverlay(); overlay.style.pointerEvents='auto'; newBtn.style.display='inline-block';});
 
-// Admin (permanece igual)
+// Admin permanece igual
 const gearBtn=document.getElementById('gearBtn');
 const modalBack=document.getElementById('modalBack');
 const modalCloseBtn=document.getElementById('modalCloseBtn');
@@ -327,4 +330,3 @@ wipeAllBtn.addEventListener('click',()=>{if(confirm('Limpar storage da página?'
 </script>
 </body>
 </html>
-
