@@ -6,8 +6,8 @@
 <title>Raspe e ganhe</title>
 <style>
 :root{
-  --bg-desktop: url('https://i.imgur.com/7FXx8jt.png');
-  --bg-mobile: url('https://i.imgur.com/GvTCnJ7.png');
+  --bg-desktop: url('https://i.imgur.com/7FXx8jt.png'); 
+  --bg-mobile: url('https://i.imgur.com/GvTCnJ7.png');   
 }
 body{
   margin:0;
@@ -22,41 +22,37 @@ body{
   transition: background 0.3s ease;
 }
 @media (max-width:768px){
-  body{background: var(--bg-mobile) center/cover no-repeat;}
+  body{ background: var(--bg-mobile) center/cover no-repeat; }
 }
-
-.wrap{
-  width:360px;
-  max-width:96%;
-  text-align:center;
-}
-.logo{
-  max-width:150px;
-  margin-bottom:12px;
-}
+.wrap{ width:360px; max-width:96%; text-align:center; }
+.logo{ max-width:150px; margin-bottom:12px; }
 .card{
   background:rgba(0,0,0,0.6);
   border-radius:12px;
   padding:14px;
   box-shadow:0 10px 30px rgba(0,0,0,0.6);
 }
-h1{margin:0 0 12px;font-size:18px;}
+h1{ margin:0 0 12px; font-size:18px; }
 .scratch-area{
-  position:relative;width:100%;height:200px;border-radius:10px;overflow:hidden;background:#0f1724;display:flex;align-items:center;justify-content:center;margin-bottom:10px;
+  position:relative;
+  width:100%;
+  height:200px;
+  border-radius:10px;
+  overflow:hidden;
+  background:#0f1724;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:10px;
 }
 canvas#overlay{
-  position:absolute;inset:0;width:100%;height:100%;z-index:2;cursor:grab;border-radius:10px;
-}
-#prizeInside{
   position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-size:24px;
-  font-weight:bold;
-  color:#fff;
-  z-index:1;
-  text-align:center;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:2;
+  cursor:grab;
+  border-radius:10px;
 }
 .prize-below{
   text-align:center;
@@ -74,16 +70,17 @@ canvas#overlay{
   border-radius:8px;
   margin-bottom:8px;
 }
-.controls{display:flex;gap:8px;justify-content:center;margin-top:12px;}
-button{background:#ff9f1c;border:none;padding:8px 12px;border-radius:10px;color:#08121b;font-weight:700;cursor:pointer;}
-button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fff;}
-.gear{position:fixed;right:18px;bottom:18px;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;z-index:999;}
-.modal-back{position:fixed;inset:0;background:rgba(2,6,12,0.6);display:none;align-items:center;justify-content:center;z-index:1000;}
-.modal{width:520px;max-width:94%;background:#041427;padding:16px;border-radius:10px;}
-.row{display:flex;gap:8px;margin-top:8px;align-items:center;}
-.row input[type="text"], .row input[type="number"], .row input[type="password"]{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#fff;}
-.small{font-size:13px;color:rgba(170,170,180,0.9);margin-top:6px;}
-.danger{background:#ff4d4d;color:#111;}
+.controls{ display:flex; gap:8px; justify-content:center; margin-top:12px; }
+button{ background:#ff9f1c; border:none; padding:8px 12px; border-radius:10px; color:#08121b; font-weight:700; cursor:pointer; }
+button.ghost{ background:transparent; border:1px solid rgba(255,255,255,0.06); color:#fff; }
+.gear{ position:fixed; right:18px; bottom:18px; width:52px; height:52px; border-radius:50%; background:rgba(255,255,255,0.03); display:flex; align-items:center; justify-content:center; color:#fff; cursor:pointer; z-index:999; }
+.modal-back{ position:fixed; inset:0; background:rgba(2,6,12,0.6); display:none; align-items:center; justify-content:center; z-index:1000; }
+.modal{ width:520px; max-width:94%; background:#041427; padding:16px; border-radius:10px; }
+.row{ display:flex; gap:8px; margin-top:8px; align-items:center; }
+.row input[type="text"], .row input[type="number"], .row input[type="password"]{ flex:1; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:#fff; }
+.small{ font-size:13px; color:rgba(170,170,180,0.9); margin-top:6px; }
+.danger{ background:#ff4d4d; color:#111; }
+#prizeInside{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:24px; font-weight:bold; z-index:1; pointer-events:none; color:#fff; }
 </style>
 </head>
 <body>
@@ -94,9 +91,9 @@ button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);colo
     <h1>Raspe e Ganhe</h1>
 
     <div class="scratch-area" id="scratchArea">
-      <div id="prizeInside">🎁 10% de desconto</div>
       <canvas id="overlay"></canvas>
       <div id="raspeText" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-weight:bold;font-size:20px;pointer-events:none;z-index:3;">Raspe aqui</div>
+      <div id="prizeInside"></div>
     </div>
 
     <div class="prize-below" id="prizeBelow"></div>
@@ -110,6 +107,7 @@ button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);colo
 </div>
 
 <div class="gear" id="gearBtn" title="Admin">⚙️</div>
+
 <div class="modal-back" id="modalBack">
   <div class="modal" role="dialog" aria-modal="true">
     <h2>Painel Admin</h2>
@@ -119,8 +117,8 @@ button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);colo
         <button id="adminLoginBtn">Entrar</button>
         <button class="ghost" id="modalCloseBtn">Fechar</button>
       </div>
-      <div class="small">Senha padrão: <b>Contatar o Administrador</b></div>
     </div>
+
     <div id="panelArea" style="display:none">
       <div class="small">Liberar raspadinhas:</div>
       <div class="row">
@@ -144,11 +142,11 @@ button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);colo
 <script>
 const overlay=document.getElementById('overlay');
 const prizeBelow=document.getElementById('prizeBelow');
-const prizeInside=document.getElementById('prizeInside');
 const newBtn=document.getElementById('newBtn');
 const statusText=document.getElementById('statusText');
 const historyDiv=document.getElementById('history');
 const raspeText=document.getElementById('raspeText');
+const prizeInside=document.getElementById('prizeInside');
 
 const KEY_LAST='raspadinha_last';
 const KEY_PRIZE='raspadinha_prize';
@@ -156,22 +154,30 @@ const KEY_USES='raspadinha_uses';
 const KEY_LIMIT='raspadinha_limit_days';
 const KEY_HISTORY='raspadinha_history';
 const DEFAULT_LIMIT=7;
-const DEFAULT_ADMIN_PASS='admin123';
+const DEFAULT_ADMIN_PASS='admin123'; // <-- coloque aqui sua senha
 
-const PRIZES=[
-{emoji:'🎁',label:'10% de desconto'},
-{emoji:'🎉',label:'Brinde surpresa'},
-{emoji:'💎',label:'Cupom VIP'},
-{emoji:'🧸',label:'Pelúcia exclusiva'},
-{emoji:'🍫',label:'Chocolate grátis'},
-{emoji:'☕',label:'Café grátis'},
-{emoji:'🎟️',label:'Sorteio VIP'},
-{emoji:'✨',label:'Prêmio especial'},
-{emoji:'💰',label:'R$5 cashback'},
-{emoji:'🏆',label:'Troféu digital'}
+const PRIZES = [
+  {emoji:'🎁', label:'10% de desconto', weight:10},
+  {emoji:'🎉', label:'Brinde surpresa', weight:5},
+  {emoji:'💎', label:'Cupom VIP', weight:2},
+  {emoji:'🧸', label:'Pelúcia exclusiva', weight:3},
+  {emoji:'🍫', label:'Chocolate grátis', weight:9},
+  {emoji:'☕', label:'Café grátis', weight:7},
+  {emoji:'🎟️', label:'Sorteio VIP', weight:7},
+  {emoji:'✨', label:'Prêmio especial', weight:3},
+  {emoji:'💰', label:'R$5 cashback', weight:4},
+  {emoji:'🏆', label:'Troféu digital', weight:2}
 ];
 
 let ctx,w,h,isDrawing=false,revealed=false;
+
+// --- Função pickPrize com chance igual ---
+function pickPrize(){
+  const weighted = [];
+  PRIZES.forEach(p=>{ for(let i=0;i<p.weight;i++) weighted.push(p); });
+  const idx=Math.floor(Math.random()*weighted.length);
+  return weighted[idx];
+}
 
 // --- Canvas ---
 function resizeCanvas(){
@@ -182,7 +188,6 @@ function resizeCanvas(){
   ctx=overlay.getContext('2d');
   createOverlay();
 }
-
 function createOverlay(){
   ctx.globalCompositeOperation='source-over';
   ctx.fillStyle='#cfcfcf';
@@ -193,63 +198,17 @@ function createOverlay(){
   ctx.globalAlpha=1;
   ctx.globalCompositeOperation='destination-out';
   raspeText.style.display='block';
+  prizeInside.textContent='';
+  prizeBelow.textContent='';
   revealed=false;
-
-  // Sorteia o prêmio e coloca no prêmio dentro
-  let prize = pickPrize();
-  setStoredPrize(prize);
-  prizeInside.textContent = prize.emoji + ' ' + prize.label;
 }
 
-function pt(e){
-  const r=overlay.getBoundingClientRect();
-  const p=e.touches?e.touches[0]:e;
-  return {x:p.clientX-r.left, y:p.clientY-r.top};
-}
-
-function drawDot(x,y){
-  ctx.beginPath();
-  ctx.arc(x,y,20,0,Math.PI*2);
-  ctx.fill();
-}
-
-function startDraw(e){
-  if(!canScratch()){showLocked(); return;}
-  isDrawing=true;
-  drawDot(pt(e).x, pt(e).y);
-  e.preventDefault();
-}
-function moveDraw(e){
-  if(!isDrawing) return;
-  e.preventDefault();
-  const p=pt(e);
-  ctx.lineWidth=20;
-  ctx.lineCap='round';
-  ctx.beginPath();
-  ctx.moveTo(p.x,p.y);
-  ctx.lineTo(p.x+0.01,p.y+0.01);
-  ctx.stroke();
-  checkReveal();
-}
+// --- Eventos ---
+function pt(e){const r=overlay.getBoundingClientRect(); const p=e.touches?e.touches[0]:e; return {x:p.clientX-r.left, y:p.clientY-r.top};}
+function drawDot(x,y){ctx.beginPath(); ctx.arc(x,y,20,0,Math.PI*2); ctx.fill();}
+function startDraw(e){if(!canScratch()){showLocked(); return;} isDrawing=true; drawDot(pt(e).x, pt(e).y); e.preventDefault();}
+function moveDraw(e){if(!isDrawing) return; e.preventDefault(); const p=pt(e); ctx.lineWidth=20; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(p.x+0.01,p.y+0.01); ctx.stroke(); checkReveal();}
 function endDraw(){if(!isDrawing) return; isDrawing=false; checkReveal();}
-
-function pickPrize(){return PRIZES[Math.floor(Math.random()*PRIZES.length)];}
-
-function checkReveal(){
-  const img=ctx.getImageData(0,0,w,h).data;
-  let cleared=0;
-  for(let i=3;i<img.length;i+=4) if(img[i]===0) cleared++;
-  if(cleared/(w*h)*100>35 && !revealed){
-    revealed=true;
-    addHistory(getStoredPrize());
-    setUses(getUses()-1);
-    setLast(Date.now());
-    overlay.style.pointerEvents='none';
-    raspeText.style.display='none';
-    newBtn.style.display='none';
-    prizeBelow.textContent = "Você ganhou: " + getStoredPrize().emoji + " " + getStoredPrize().label;
-  }
-}
 
 // --- Storage ---
 function getLast(){return parseInt(localStorage.getItem(KEY_LAST)||'0',10);}
@@ -261,39 +220,17 @@ function setLimit(v){localStorage.setItem(KEY_LIMIT,String(v)); statusText.textC
 function getStoredPrize(){try{return JSON.parse(localStorage.getItem(KEY_PRIZE));}catch(e){return null;}}
 function setStoredPrize(p){localStorage.setItem(KEY_PRIZE,JSON.stringify(p));}
 function getHistory(){try{return JSON.parse(localStorage.getItem(KEY_HISTORY))||[];}catch(e){return []}}
-function addHistory(p){
-  const h=getHistory();
-  h.unshift({time:Date.now(),emoji:p.emoji,label:p.label});
-  localStorage.setItem(KEY_HISTORY,JSON.stringify(h));
-  updateHistory();
-}
-function updateHistory(){
-  const h=getHistory();
-  historyDiv.innerHTML=h.map(i=>`${new Date(i.time).toLocaleString()}: ${i.emoji} ${i.label}`).join('<br>')||'Histórico:';
-}
-function canScratch(){
-  const last=getLast();
-  const limit=getLimit()*24*60*60*1000;
-  return getUses()>0 || (Date.now()-last)>limit;
-}
-function showLocked(){
-  const prize=getStoredPrize();
-  prizeBelow.textContent=prize?("Você ganhou: "+prize.emoji+" "+prize.label):'Você já usou!';
-  overlay.style.pointerEvents='none';
-  newBtn.style.display='none';
-  raspeText.style.display='none';
-  const last=getLast();
-  const remaining=Math.max(0,getLimit()*24*60*60*1000-(Date.now()-last));
-  const hours=Math.floor(remaining/3600000);
-  const minutes=Math.floor((remaining%3600000)/60000);
-  const seconds=Math.floor((remaining%60000)/1000);
-  statusText.textContent=`Próxima raspadinha em ${hours}h ${minutes}m ${seconds}s`;
-}
+function addHistory(p){ const h=getHistory(); h.unshift({time:Date.now(),emoji:p.emoji,label:p.label}); localStorage.setItem(KEY_HISTORY,JSON.stringify(h)); updateHistory();}
+function updateHistory(){ const h=getHistory(); historyDiv.innerHTML=h.map(i=>`${new Date(i.time).toLocaleString()}: ${i.emoji} ${i.label}`).join('<br>')||'Histórico:';}
+
+// --- Raspadinha ---
+function canScratch(){ const last=getLast(); const limit=getLimit()*24*60*60*1000; return getUses()>0 || (Date.now()-last)>limit; }
+function showLocked(){ const prize=getStoredPrize(); prizeBelow.textContent=prize?prize.emoji+' '+prize.label:'Você já usou!'; overlay.style.pointerEvents='none'; newBtn.style.display='none'; raspeText.style.display='none'; const last=getLast(); const remaining=Math.max(0,getLimit()*24*60*60*1000-(Date.now()-last)); const hours=Math.floor(remaining/3600000); const minutes=Math.floor((remaining%3600000)/60000); const seconds=Math.floor((remaining%60000)/1000); statusText.textContent=`Próxima raspadinha em ${hours}h ${minutes}m ${seconds}s`; }
+function checkReveal(){ const img=ctx.getImageData(0,0,w,h).data; let cleared=0; for(let i=3;i<img.length;i+=4) if(img[i]===0) cleared++; if(cleared/(w*h)*100>35 && !revealed){ revealed=true; let prize=getStoredPrize(); if(!prize) prize=pickPrize(); prizeBelow.textContent=prize.emoji+' '+prize.label; prizeInside.textContent=prize.emoji+' '+prize.label; setStoredPrize(prize); addHistory(prize); setUses(getUses()-1); setLast(Date.now()); overlay.style.pointerEvents='none'; raspeText.style.display='none'; newBtn.style.display='none'; }}
 
 // --- Eventos ---
-window.addEventListener('load',()=>{resizeCanvas(); updateHistory(); if(!canScratch()) showLocked();});
+window.addEventListener('load',()=>{ resizeCanvas(); updateHistory(); if(!canScratch()) showLocked(); });
 window.addEventListener('resize',()=>setTimeout(resizeCanvas,50));
-
 overlay.addEventListener('pointerdown',e=>{overlay.setPointerCapture(e.pointerId); startDraw(e);});
 overlay.addEventListener('pointermove',moveDraw);
 overlay.addEventListener('pointerup',endDraw);
@@ -304,7 +241,7 @@ overlay.addEventListener('touchend',endDraw);
 
 newBtn.addEventListener('click',()=>{createOverlay(); overlay.style.pointerEvents='auto'; newBtn.style.display='inline-block';});
 
-// Admin permanece igual
+// --- Admin ---
 const gearBtn=document.getElementById('gearBtn');
 const modalBack=document.getElementById('modalBack');
 const modalCloseBtn=document.getElementById('modalCloseBtn');
@@ -322,10 +259,18 @@ const wipeAllBtn=document.getElementById('wipeAllBtn');
 gearBtn.addEventListener('click',()=>{modalBack.style.display='flex';adminPassInput.focus();});
 modalCloseBtn.addEventListener('click',()=>{modalBack.style.display='none';adminPassInput.value='';});
 modalBack.addEventListener('click',e=>{if(e.target===modalBack){modalBack.style.display='none';adminPassInput.value='';}});
-adminLoginBtn.addEventListener('click',()=>{if(adminPassInput.value===DEFAULT_ADMIN_PASS){loginArea.style.display='none';panelArea.style.display='block';}else{alert('Senha incorreta');}});
+adminLoginBtn.addEventListener('click',()=>{
+    if(adminPassInput.value===DEFAULT_ADMIN_PASS){
+        loginArea.style.display='none';
+        panelArea.style.display='block';
+    } else {
+        alert('Senha incorreta');
+    }
+});
 grantUsesBtn.addEventListener('click',()=>{let n=parseInt(grantUsesInput.value)||1; setUses(n); alert('Usuário liberado para '+n+' raspada(s).');});
 setLimitBtn.addEventListener('click',()=>{let d=parseInt(limitDaysInput.value)||DEFAULT_LIMIT; setLimit(d); alert('Limite alterado para '+d+' dia(s)');});
 resetUserBtn.addEventListener('click',()=>{if(confirm('Resetar usuário?')){localStorage.removeItem(KEY_LAST);localStorage.removeItem(KEY_PRIZE);localStorage.removeItem(KEY_USES);localStorage.removeItem(KEY_HISTORY);createOverlay(); overlay.style.pointerEvents='auto'; newBtn.style.display='inline-block'; updateHistory();}});
+
 wipeAllBtn.addEventListener('click',()=>{if(confirm('Limpar storage da página?')){localStorage.clear();alert('Storage limpo. Recarregue a página.'); updateHistory();}});
 </script>
 </body>
