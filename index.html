@@ -157,16 +157,31 @@ const DEFAULT_LIMIT=7;
 const DEFAULT_ADMIN_PASS='admin123';
 
 const PRIZES = [
-  {emoji:'🎁', label:'10% de desconto', weight:10},
-  {emoji:'🎉', label:'Brinde surpresa', weight:5},
-  {emoji:'💎', label:'Cupom VIP', weight:2},
-  {emoji:'🧸', label:'Pelúcia exclusiva', weight:3},
-  {emoji:'🍫', label:'Chocolate grátis', weight:9},
-  {emoji:'☕', label:'Café grátis', weight:7},
-  {emoji:'🎟️', label:'Sorteio VIP', weight:7},
-  {emoji:'✨', label:'Prêmio especial', weight:3},
-  {emoji:'💰', label:'R$5 cashback', weight:4},
-  {emoji:'🏆', label:'Troféu digital', weight:2}
+  {emoji:'🥤', label:'1 Coca lata zero ou normal', weight:1},
+  {emoji:'🥤', label:'1 Coca 2L zero ou normal', weight:1},
+  {emoji:'🍟', label:'Batata de 100g', weight:10},
+  {emoji:'🪵🍟', label:'Batata rústica de 100g', weight:10},
+  {emoji:'🧅', label:'Onion rings 4 unidades', weight:10},
+  {emoji:'🧀', label:'Almofadas de queijo com geleia de pimenta', weight:2},
+  {emoji:'🍟', label:'Batata de 200g com molho', weight:2},
+  {emoji:'🪵🍟', label:'Batata rústica de 200g com molho', weight:2},
+  {emoji:'🧅🔥', label:'Onion rings 9 unidades com BBQ', weight:2},
+  {emoji:'🍟✨', label:'Mini batata especial', weight:2},
+  {emoji:'🍟👑', label:'Mini batata suprema', weight:2},
+  {emoji:'🧅✨', label:'Mini onion magnífica', weight:2},
+  {emoji:'🍟⭐', label:'Batata especial', weight:1},
+  {emoji:'🍟👑', label:'Batata suprema', weight:1},
+  {emoji:'🧅👑', label:'Onion magnífica', weight:1},
+  {emoji:'🍔🧀', label:'NB carne e queijo', weight:2},
+  {emoji:'🍔🧀🥓', label:'NB cheddar e bacon', weight:1},
+  {emoji:'🍔⚡', label:'NB power', weight:1},
+  {emoji:'🍔👶', label:'NB kids', weight:1},
+  {emoji:'🍔', label:'NB tradicional', weight:1},
+  {emoji:'🍱🏆', label:'Box especial (escolhe o NB)', weight:1},
+  {emoji:'🥪🥗', label:'Xis salada', weight:2},
+  {emoji:'🥪🐔', label:'Xis frango', weight:2},
+  {emoji:'🥪🥓', label:'Xis bacon', weight:1},
+  {emoji:'🥪🌭', label:'Xis calabresa', weight:1}
 ];
 
 let ctx,w,h,isDrawing=false,revealed=false;
@@ -225,7 +240,6 @@ function updateHistory(){ const h=getHistory(); historyDiv.innerHTML=h.map(i=>`$
 function canScratch(){ const last=getLast(); const limit=getLimit()*24*60*60*1000; return getUses()>0 || (Date.now()-last)>limit; }
 function showLocked(){ const last=getLast(); const remaining=Math.max(0,getLimit()*24*60*60*1000-(Date.now()-last)); const hours=Math.floor(remaining/3600000); const minutes=Math.floor((remaining%3600000)/60000); const seconds=Math.floor((remaining%60000)/1000); statusText.textContent=`Próxima raspadinha em ${hours}h ${minutes}m ${seconds}s`; overlay.style.pointerEvents='none'; raspeText.style.display='none'; newBtn.style.display='inline-block'; }
 function checkReveal(){ const img=ctx.getImageData(0,0,w,h).data; let cleared=0; for(let i=3;i<img.length;i+=4) if(img[i]===0) cleared++; if(cleared/(w*h)*100>35 && !revealed){ revealed=true; const prize=pickPrize(); prizeBelow.textContent=prize.emoji+' '+prize.label; prizeInside.textContent=prize.emoji+' '+prize.label; addHistory(prize); setUses(getUses()-1); setLast(Date.now()); overlay.style.pointerEvents='none'; raspeText.style.display='none'; newBtn.style.display='inline-block'; }}
-
 // --- Eventos ---
 window.addEventListener('load',()=>{ resizeCanvas(); updateHistory(); if(!canScratch()) showLocked(); });
 window.addEventListener('resize',()=>setTimeout(resizeCanvas,50));
